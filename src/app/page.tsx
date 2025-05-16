@@ -5,9 +5,9 @@ import { AIRecommendationPanel } from '@/components/ai-recommendation-panel';
 
 export default function Home() {
 	return (
-		<main className='min-h-screen bg-gray-100'>
+		<main className='min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50'>
 			<div className='container mx-auto py-8 px-4'>
-				<h1 className='text-3xl font-bold mb-8 text-center'>
+				<h1 className='text-3xl font-bold mb-8 text-center text-gray-800'>
 					Interactive Itinerary Board
 				</h1>
 				<div className='grid grid-cols-1 lg:grid-cols-3 gap-8'>

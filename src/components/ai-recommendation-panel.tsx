@@ -24,8 +24,10 @@ export function AIRecommendationPanel() {
 	};
 
 	return (
-		<div className='bg-white rounded-lg shadow-md p-6'>
-			<h2 className='text-2xl font-bold mb-4'>AI Recommendations</h2>
+		<div className='bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-6 border border-gray-100'>
+			<h2 className='text-2xl font-bold mb-4 text-gray-800'>
+				AI Recommendations
+			</h2>
 			<form onSubmit={handleSubmit} className='space-y-4'>
 				<div>
 					<label className='block text-sm font-medium text-gray-700 mb-1'>
@@ -33,7 +35,7 @@ export function AIRecommendationPanel() {
 					</label>
 					<input
 						type='text'
-						className='w-full px-3 py-2 border border-gray-300 rounded-md'
+						className='w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors'
 						placeholder='e.g., museums, food, nature'
 						onChange={handleInterestChange}
 					/>
@@ -45,7 +47,7 @@ export function AIRecommendationPanel() {
 						</label>
 						<input
 							type='date'
-							className='w-full px-3 py-2 border border-gray-300 rounded-md'
+							className='w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors'
 							value={startDate}
 							onChange={e => setStartDate(e.target.value)}
 						/>
@@ -56,7 +58,7 @@ export function AIRecommendationPanel() {
 						</label>
 						<input
 							type='date'
-							className='w-full px-3 py-2 border border-gray-300 rounded-md'
+							className='w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors'
 							value={endDate}
 							onChange={e => setEndDate(e.target.value)}
 						/>
@@ -65,7 +67,7 @@ export function AIRecommendationPanel() {
 				<button
 					type='submit'
 					disabled={isLoading}
-					className='w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50'
+					className='w-full bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors font-medium'
 				>
 					{isLoading ? 'Loading...' : 'Get Suggestions'}
 				</button>
@@ -73,23 +75,25 @@ export function AIRecommendationPanel() {
 
 			{suggestions.length > 0 && (
 				<div className='mt-6'>
-					<h3 className='text-lg font-semibold mb-3'>Suggested Activities</h3>
+					<h3 className='text-lg font-semibold mb-3 text-gray-800'>
+						Suggested Activities
+					</h3>
 					<div className='space-y-3'>
 						{suggestions.map(item => (
 							<motion.div
 								key={item.id}
 								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
-								className='bg-gray-50 p-4 rounded-md'
+								className='bg-white/50 backdrop-blur-sm p-4 rounded-lg border border-gray-100 shadow-sm hover:shadow-md transition-shadow'
 							>
 								<div className='flex items-start justify-between'>
 									<div>
-										<h4 className='font-medium'>{item.title}</h4>
+										<h4 className='font-medium text-gray-800'>{item.title}</h4>
 										<p className='text-sm text-gray-600 mt-1'>
 											{item.description}
 										</p>
 									</div>
-									<span className='bg-green-100 text-green-800 text-xs px-2 py-1 rounded'>
+									<span className='bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full font-medium'>
 										Suggested
 									</span>
 								</div>

@@ -1,10 +1,18 @@
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { DayColumn } from './day-column';
 import { useItineraryStore } from '@/lib/state';
+import { useState } from 'react';
+import { ItineraryItem } from './itinerary-item';
+import { ItineraryItem as ItineraryItemType } from '@/lib/state';
 
 export function ItineraryBoard() {
 	const { items, moveItem } = useItineraryStore();
+	const [activeId, setActiveId] = useState<string | null>(null);
+
+	const handleDragStart = (event: any) => {
+		setActiveId(event.active.id);
+	};
 
 	const handleDragEnd = (event: DragEndEvent) => {
 		const { active, over } = event;
@@ -18,13 +26,24 @@ export function ItineraryBoard() {
 			const day = parseInt(overId.split('-')[1]);
 			moveItem(activeId, day);
 		}
+
+		setActiveId(null);
+	};
+
+	const handleDragCancel = () => {
+		setActiveId(null);
 	};
 
 	const days = [1, 2, 3, 4, 5]; // Example: 5-day itinerary
+	const activeItem = items.find(item => item.id === activeId);
 
 	return (
-		<DndContext onDragEnd={handleDragEnd}>
-			<div className='flex gap-4 p-4 overflow-x-auto'>
+		<DndContext
+			onDragStart={handleDragStart}
+			onDragEnd={handleDragEnd}
+			onDragCancel={handleDragCancel}
+		>
+			<div className='flex gap-4 p-4 overflow-x-auto min-h-[600px]'>
 				{days.map(day => (
 					<DayColumn
 						key={day}
@@ -33,6 +52,9 @@ export function ItineraryBoard() {
 					/>
 				))}
 			</div>
+			<DragOverlay>
+				{activeId && activeItem ? <ItineraryItem item={activeItem} /> : null}
+			</DragOverlay>
 		</DndContext>
 	);
 }
