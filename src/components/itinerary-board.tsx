@@ -1,17 +1,20 @@
-import { DndContext, DragEndEvent, DragOverlay } from '@dnd-kit/core';
-import { SortableContext, arrayMove } from '@dnd-kit/sortable';
+import {
+	DndContext,
+	DragEndEvent,
+	DragOverlay,
+	DragStartEvent,
+} from '@dnd-kit/core';
 import { DayColumn } from './day-column';
 import { useItineraryStore } from '@/lib/state';
 import { useState } from 'react';
 import { ItineraryItem } from './itinerary-item';
-import { ItineraryItem as ItineraryItemType } from '@/lib/state';
 
 export function ItineraryBoard() {
 	const { items, moveItem } = useItineraryStore();
 	const [activeId, setActiveId] = useState<string | null>(null);
 
-	const handleDragStart = (event: any) => {
-		setActiveId(event.active.id);
+	const handleDragStart = (event: DragStartEvent) => {
+		setActiveId(event.active.id.toString());
 	};
 
 	const handleDragEnd = (event: DragEndEvent) => {
