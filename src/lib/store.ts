@@ -53,69 +53,71 @@ const initialItems: Omit<ItineraryItem, 'id'>[] = [
   }
 ]
 
-export const useItineraryStore = create<ItineraryState>()(
-  persist(
-    (set) => ({
-      items: initialItems.map(item => ({ ...item, id: crypto.randomUUID() })),
-      suggestions: [],
-      isLoading: false,
-      addItem: (item) => {
-        set((state) => ({
-          items: [...state.items, { ...item, id: crypto.randomUUID() }]
-        }))
-      },
-      removeItem: (id) => {
-        set((state) => ({
-          items: state.items.filter(item => item.id !== id)
-        }))
-      },
-      moveItem: (id, day) => {
-        set((state) => ({
-          items: state.items.map(item =>
-            item.id === id ? { ...item, day } : item
-          )
-        }))
-      },
-      updateItem: (id, updates) => {
-        set((state) => ({
-          items: state.items.map(item =>
-            item.id === id ? { ...item, ...updates } : item
-          )
-        }))
-      },
-      fetchSuggestions: async (params) => {
-        set({ isLoading: true })
-        try {
-          const response = await fetch('/api/suggestions', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(params)
-          })
-          const data = await response.json()
-          set({
-            suggestions: data.map((item: Omit<ItineraryItem, 'id' | 'isSuggested'>) => ({
-              ...item,
-              id: crypto.randomUUID(),
-              isSuggested: true
-            }))
-          })
-        } catch (error) {
-          console.error('Failed to fetch suggestions:', error)
-        } finally {
-          set({ isLoading: false })
+const createStore = () => {
+  return create<ItineraryState>()(
+    persist(
+      (set) => ({
+        items: initialItems.map(item => ({ ...item, id: crypto.randomUUID() })),
+        suggestions: [],
+        isLoading: false,
+        addItem: (item) => {
+          set((state) => ({
+            items: [...state.items, { ...item, id: crypto.randomUUID() }]
+          }))
+        },
+        removeItem: (id) => {
+          set((state) => ({
+            items: state.items.filter(item => item.id !== id)
+          }))
+        },
+        moveItem: (id, day) => {
+          set((state) => ({
+            items: state.items.map(item =>
+              item.id === id ? { ...item, day } : item
+            )
+          }))
+        },
+        updateItem: (id, updates) => {
+          set((state) => ({
+            items: state.items.map(item =>
+              item.id === id ? { ...item, ...updates } : item
+            )
+          }))
+        },
+        fetchSuggestions: async (params) => {
+          set({ isLoading: true })
+          try {
+            const response = await fetch('/api/suggestions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(params)
+            })
+            const data = await response.json()
+            set({
+              suggestions: data.map((item: Omit<ItineraryItem, 'id' | 'isSuggested'>) => ({
+                ...item,
+                id: crypto.randomUUID(),
+                isSuggested: true
+              }))
+            })
+          } catch (error) {
+            console.error('Failed to fetch suggestions:', error)
+          } finally {
+            set({ isLoading: false })
+          }
         }
+      }),
+      {
+        name: 'itinerary-storage',
+        storage: createJSONStorage(() => localStorage),
+        partialize: (state) => ({ items: state.items }),
+        skipHydration: true
       }
-    }),
-    {
-      name: 'itinerary-storage',
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ items: state.items }),
-      onRehydrateStorage: () => (state) => {
-        console.log('State rehydrated:', state)
-      }
-    }
+    )
   )
-)
+}
+
+export const useItineraryStore = createStore()
 
 // Auto-save on state changes
 const autoSave = debounce(() => {
