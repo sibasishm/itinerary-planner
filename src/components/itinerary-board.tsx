@@ -1,17 +1,40 @@
+'use client';
+
+import { useState } from 'react';
 import {
 	DndContext,
+	DragStartEvent,
 	DragEndEvent,
 	DragOverlay,
-	DragStartEvent,
+	useSensor,
+	useSensors,
+	PointerSensor,
+	TouchSensor,
 } from '@dnd-kit/core';
+import { SortableContext, arrayMove } from '@dnd-kit/sortable';
 import { DayColumn } from './day-column';
-import { useItineraryStore } from '@/lib/state';
-import { useState } from 'react';
 import { ItineraryItem } from './itinerary-item';
+import { useItineraryStore } from '@/lib/store';
+import { getDayLabel } from '@/lib/utils';
 
 export function ItineraryBoard() {
-	const { items, moveItem } = useItineraryStore();
 	const [activeId, setActiveId] = useState<string | null>(null);
+	const items = useItineraryStore(state => state.items);
+	const moveItem = useItineraryStore(state => state.moveItem);
+
+	const sensors = useSensors(
+		useSensor(PointerSensor, {
+			activationConstraint: {
+				distance: 8,
+			},
+		}),
+		useSensor(TouchSensor, {
+			activationConstraint: {
+				delay: 250,
+				tolerance: 5,
+			},
+		})
+	);
 
 	const handleDragStart = (event: DragStartEvent) => {
 		setActiveId(event.active.id.toString());
@@ -20,44 +43,45 @@ export function ItineraryBoard() {
 	const handleDragEnd = (event: DragEndEvent) => {
 		const { active, over } = event;
 
-		if (!over) return;
-
-		const activeId = active.id as string;
-		const overId = over.id as string;
-
-		if (overId.startsWith('day-')) {
-			const day = parseInt(overId.split('-')[1]);
-			moveItem(activeId, day);
+		if (over && active.id !== over.id) {
+			const oldIndex = items.findIndex(item => item.id === active.id);
+			const newIndex = items.findIndex(item => item.id === over.id);
+			const newItems = arrayMove(items, oldIndex, newIndex);
+			moveItem(active.id.toString(), newItems[newIndex].day);
 		}
 
 		setActiveId(null);
 	};
 
-	const handleDragCancel = () => {
-		setActiveId(null);
-	};
-
-	const days = [1, 2, 3, 4, 5]; // Example: 5-day itinerary
 	const activeItem = items.find(item => item.id === activeId);
 
 	return (
-		<DndContext
-			onDragStart={handleDragStart}
-			onDragEnd={handleDragEnd}
-			onDragCancel={handleDragCancel}
-		>
-			<div className='flex gap-4 p-4 overflow-x-auto min-h-[600px]'>
-				{days.map(day => (
-					<DayColumn
-						key={day}
-						day={day}
-						items={items.filter(item => item.day === day)}
-					/>
-				))}
-			</div>
-			<DragOverlay>
-				{activeId && activeItem ? <ItineraryItem item={activeItem} /> : null}
-			</DragOverlay>
-		</DndContext>
+		<div className='space-y-4'>
+			<DndContext
+				sensors={sensors}
+				onDragStart={handleDragStart}
+				onDragEnd={handleDragEnd}
+			>
+				<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+					{[1, 2, 3].map(day => (
+						<div key={day} className='bg-white rounded-lg shadow-sm p-4'>
+							<h2 className='text-lg font-semibold text-indigo-900 mb-4'>
+								{getDayLabel(day)}
+							</h2>
+							<SortableContext
+								items={items
+									.filter(item => item.day === day)
+									.map(item => item.id)}
+							>
+								<DayColumn day={day} />
+							</SortableContext>
+						</div>
+					))}
+				</div>
+				<DragOverlay>
+					{activeItem && <ItineraryItem item={activeItem} />}
+				</DragOverlay>
+			</DndContext>
+		</div>
 	);
 }
