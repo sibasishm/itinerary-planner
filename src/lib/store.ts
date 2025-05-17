@@ -55,7 +55,7 @@ const initialItems: Omit<ItineraryItem, 'id'>[] = [
 
 export const useItineraryStore = create<ItineraryState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       items: initialItems.map(item => ({ ...item, id: crypto.randomUUID() })),
       suggestions: [],
       isLoading: false,
@@ -123,6 +123,4 @@ const autoSave = debounce(() => {
   localStorage.setItem('itinerary-storage', JSON.stringify({ state: { items: state.items } }))
 }, 500)
 
-useItineraryStore.subscribe((state) => {
-  autoSave()
-}) 
+useItineraryStore.subscribe(autoSave) 
