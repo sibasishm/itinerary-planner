@@ -1,20 +1,37 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { ItineraryBoard } from '@/components/itinerary-board';
 import { AIRecommendationPanel } from '@/components/ai-recommendation-panel';
 import { useItineraryStore } from '@/lib/store';
 
 export default function Home() {
+	const [isHydrated, setIsHydrated] = useState(false);
 	const fetchSuggestions = useItineraryStore(state => state.fetchSuggestions);
 
 	useEffect(() => {
-		fetchSuggestions({
-			interests: ['museums', 'food', 'nature'],
-			startDate: new Date().toISOString(),
-			endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-		});
-	}, [fetchSuggestions]);
+		// Hydrate the store
+		useItineraryStore.persist.rehydrate();
+		setIsHydrated(true);
+	}, []);
+
+	useEffect(() => {
+		if (isHydrated) {
+			fetchSuggestions({
+				interests: ['museums', 'food', 'nature'],
+				startDate: new Date().toISOString(),
+				endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+			});
+		}
+	}, [fetchSuggestions, isHydrated]);
+
+	if (!isHydrated) {
+		return (
+			<div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-indigo-50'>
+				<div className='text-indigo-600'>Loading...</div>
+			</div>
+		);
+	}
 
 	return (
 		<main className='min-h-screen bg-gradient-to-br from-indigo-50 via-white to-indigo-50'>
