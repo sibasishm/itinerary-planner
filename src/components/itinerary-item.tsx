@@ -1,8 +1,10 @@
+'use client';
+
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { motion } from 'framer-motion';
-import { ItineraryItem as ItineraryItemType } from '@/lib/state';
+import { ItineraryItem as ItineraryItemType } from '@/lib/store';
 import Image from 'next/image';
+import { formatTime } from '@/lib/utils';
 
 interface Props {
 	item: ItineraryItemType;
@@ -21,44 +23,40 @@ export function ItineraryItem({ item }: Props) {
 	const style = {
 		transform: CSS.Transform.toString(transform),
 		transition,
+		opacity: isDragging ? 0.5 : 1,
 	};
 
 	return (
-		<motion.div
+		<div
 			ref={setNodeRef}
 			style={style}
 			{...attributes}
 			{...listeners}
-			className={`bg-white/90 backdrop-blur-sm p-4 rounded-lg shadow-md cursor-move hover:shadow-lg transition-all border border-gray-100 ${
-				isDragging ? 'opacity-50 shadow-xl scale-105' : ''
-			}`}
-			whileHover={{ scale: 1.02 }}
-			whileTap={{ scale: 0.98 }}
+			className='bg-white rounded-lg shadow-sm p-4 cursor-grab active:cursor-grabbing touch-none'
 		>
-			{item.image && (
-				<div className='relative w-full h-32 mb-3 rounded-md overflow-hidden'>
-					<Image
-						src={item.image}
-						alt={item.title}
-						fill
-						className='object-cover'
-					/>
-				</div>
-			)}
-			<div className='flex items-start justify-between'>
-				<div>
-					<h3 className='font-semibold text-lg text-gray-800'>{item.title}</h3>
-					<p className='text-gray-600 text-sm mt-1'>{item.description}</p>
-					<div className='text-indigo-600 text-xs mt-2 font-medium'>
-						{item.time}
+			<div className='flex gap-4'>
+				{item.image && (
+					<div className='relative w-20 h-20 flex-shrink-0'>
+						<Image
+							src={item.image}
+							alt={item.title}
+							fill
+							className='object-cover rounded-md'
+						/>
 					</div>
-				</div>
-				{item.isSuggested && (
-					<span className='bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded-full font-medium'>
-						Suggested
-					</span>
 				)}
+				<div className='flex-1 min-w-0'>
+					<div className='flex items-start justify-between gap-2'>
+						<h3 className='font-medium text-gray-900 truncate'>{item.title}</h3>
+						<span className='text-sm text-indigo-600 font-medium whitespace-nowrap'>
+							{formatTime(item.time)}
+						</span>
+					</div>
+					<p className='text-sm text-gray-500 mt-1 line-clamp-2'>
+						{item.description}
+					</p>
+				</div>
 			</div>
-		</motion.div>
+		</div>
 	);
 }

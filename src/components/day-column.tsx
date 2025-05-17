@@ -1,39 +1,35 @@
+'use client';
+
 import { useDroppable } from '@dnd-kit/core';
 import { ItineraryItem } from './itinerary-item';
-import { ItineraryItem as ItineraryItemType } from '@/lib/state';
+import { useItineraryStore } from '@/lib/store';
 
 interface Props {
 	day: number;
-	items: ItineraryItemType[];
 }
 
-export function DayColumn({ day, items }: Props) {
-	const { setNodeRef, isOver } = useDroppable({
+export function DayColumn({ day }: Props) {
+	const { setNodeRef } = useDroppable({
 		id: `day-${day}`,
 	});
 
+	const items = useItineraryStore(state =>
+		state.items.filter(item => item.day === day)
+	);
+
 	return (
 		<div
-			className={`flex-1 min-w-[300px] bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-100 shadow-lg transition-colors ${
-				isOver ? 'bg-indigo-50/50' : ''
-			}`}
+			ref={setNodeRef}
+			className='min-h-[200px] space-y-4 p-2 bg-indigo-50/50 rounded-lg'
 		>
-			<h2 className='text-xl font-bold mb-4 text-gray-800'>Day {day}</h2>
-			<div
-				ref={setNodeRef}
-				className={`space-y-4 min-h-[500px] p-2 rounded-lg transition-colors ${
-					isOver ? 'bg-indigo-100/30' : ''
-				}`}
-			>
-				{items.map(item => (
-					<ItineraryItem key={item.id} item={item} />
-				))}
-				{items.length === 0 && (
-					<div className='h-full flex items-center justify-center text-gray-400 text-sm'>
-						Drop items here
-					</div>
-				)}
-			</div>
+			{items.map(item => (
+				<ItineraryItem key={item.id} item={item} />
+			))}
+			{items.length === 0 && (
+				<div className='h-24 flex items-center justify-center text-gray-400 text-sm'>
+					Drop activities here
+				</div>
+			)}
 		</div>
 	);
 }
